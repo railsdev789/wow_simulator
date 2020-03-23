@@ -1,0 +1,388 @@
+<h1 class="text-center">Classic Wow Gear Simulator</h1>
+<div class="container">
+  <div class="row">
+    <form class="container" method="post">
+      <div class="card mt-3">
+        <div class="card-header">
+          <h5 class="card-title">Simulation Options</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="simulations[]" value="single" checked>
+            <label class="form-check-label">Single Simulation</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="simulations[]" value="comparison" disabled>
+            <label class="form-check-label">Comparison Simulation</label>
+          </div>
+          <div class="form-group mt-3">
+            <label for="select_class" class="mb-0">Select class:</label>
+            <select class="form-control" style="width: auto;" name="select_class" id="select_class">
+              <option disabled>Caster DPS</option>
+              <option disabled>-------------</option>
+                <option value="druid_moonkin" disabled>Druid - Moonkin</option>
+                <option value="mage">Mage</option>
+                <option value="priest_shadow" disabled>Priest - Shadow</option>
+                <option value="shaman_elemental" disabled>Shaman - Elemental</option>
+                <option value="warlock" disabled>Warlock</option>
+              <option disabled>-------------</option>
+              <option disabled>Healing</option>
+              <option disabled>-------------</option>
+                <option value="druid_resto" disabled>Druid - Restoration</option>
+                <option value="paladin" disabled>Paladin</option>
+                <option value="priest" disabled>Priest</option>
+                <option value="shaman_resto" disabled>Shaman - Restoration</option>
+              <option disabled>-------------</option>
+              <option disabled>Melee DPS</option>
+              <option disabled>-------------</option>
+                <option value="druid_feral" disabled>Druid - Feral</option>
+                <option value="paladin_dps" disabled>Paladin - Retribution/Protection</option>
+                <option value="rogue" disabled>Rogue</option>
+                <option value="shaman_enhancement" disabled>Shaman - Enhancement</option>
+                <option value="warrior" disabled>Warrior</option>
+              <option disabled>-------------</option>
+              <option disabled>Ranged Physical DPS</option>
+              <option disabled>-------------</option>
+                <option value="hunter" disabled>Hunter</option>
+            </select>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h5>Fight Durations to Include in Simulation</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-group" id="durations">
+                <div class="row">
+                  <div class="col">
+                    <span>Short:</span>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="30">
+                      <label class="form-check-label">30 seconds</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="60" checked>
+                      <label class="form-check-label">1 minute</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="90">
+                      <label class="form-check-label">90 seconds</label>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <span>Medium:</span>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="120">
+                      <label class="form-check-label">2 minutes</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="180">
+                      <label class="form-check-label">3 minutes</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="240">
+                      <label class="form-check-label">4 minutes</label>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <span>Long:</span>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="300">
+                      <label class="form-check-label">5 minutes</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="360">
+                      <label class="form-check-label">6 minutes</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="durations[]" value="600">
+                      <label class="form-check-label">10 minutes</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-3">Run Simulation</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card mt-3 mb-3 mr-1" id="spell_options">
+            <div class="card-header">
+              <h5>Spell to Use for Simulation</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <% @mage_spells.each_with_index do |(spell, spell_ranks), index1| %>
+                  <% spell_ranks.keys.each_with_index do |(spell_name, spell_info), index2| %>
+                    <div class="form-check">
+                      <input type="radio" class="form-check-input" name="spell_ranks[]" value="<%= spell_name %>" <%= 'checked' if index1 == 0 && index2 == 0 %>>
+                      <label class="form-check-label"><%= spell_name.to_s.humanize.titleize %></label>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <div class="card mt-3 mb-3 mr-1" id="gear_set1">
+            <div class="card-header">
+              <h5>Gear Set 1</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <span style="font-style: italic; font-size: 12px">(<b>Note:</b> values should include your character's base stats, stats from gear, and stats from enchants only. <b>Do not include any set bonuses.</b>)</span>
+              </div>
+              <div class="form-group" id="gear_set1_body">
+                <label class="mb-0">Total Mana:</label>
+                <input class="form-control mb-3" type="text" name="gear_set1[mana]" placeholder="0">
+                <label class="mb-0">Total Intelligence:</label>
+                <input class="form-control mb-3" type="text" name="gear_set1[int]" placeholder="0">
+                <label class="mb-0">Total Spirit:</label>
+                <input class="form-control mb-3" type="text" name="gear_set1[spirit]" placeholder="0">
+                <label class="mb-0">Total mp5 (mana per 5):</label>
+                <input class="form-control mb-3" type="text" name="gear_set1[mp5]" placeholder="0">
+                <label class="mb-0">Total Spell Damage:</label>
+                <input class="form-control mb-3" type="text" name="gear_set1[spell_damage]" placeholder="0">
+                <label class="mb-0">Total Hit Chance%:</label>
+                <input class="form-control mb-3" type="text" name="gear_set1[hit_chance]" placeholder="0">
+                <label class="mb-0">Total Crit Chance%:</label>
+                <input class="form-control mb-3" type="text" name="gear_set1[crit_chance]" placeholder="0">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card mt-3 mb-3 ml-1" id="mana_regen">
+            <div class="card-header">
+              <h5>Mana Regen</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <% @mana_regen.each do |item, item_options| %>
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="mana_regen[]" value="<%= item %>">
+                    <label class="form-check-label">Use <%= item_options[:display] %></label>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <div class="card mt-3 mb-3 ml-1" id="activated_items">
+            <div class="card-header">
+              <h5>Activated Items</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <% @activated_items.each do |item, item_options| %>
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="activated_items[]" value="<%= item %>">
+                    <label class="form-check-label">Use <%= item_options[:display] %></label>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <div class="card mt-3 mb-3 ml-1" id="set_bonuses">
+            <div class="card-header">
+              <h5>Set Bonuses</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="set_bonuses[]" value="mage_tier1_3pc">
+                  <label class="form-check-label">Include Tier1 3pc Set Bonus</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="set_bonuses[]" value="mage_tier2_8pc">
+                  <label class="form-check-label">Include Tier2 8pc Set Bonus</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="set_bonuses[]" value="mage_rare_pvp_2pc">
+                  <label class="form-check-label">Include PvP Mage Rare 2pc Set Bonus</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="set_bonuses[]" value="mage_epic_pvp_6pc">
+                  <label class="form-check-label">Include PvP Mage Epic 6pc Set Bonus</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card mt-3 mb-3 ml-1" id="talents">
+            <div class="card-header">
+              <h5>Talents</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="arcane_power">
+                  <label class="form-check-label">Use Arcane Power</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="arcane_concentration">
+                  <label class="form-check-label">Use Arcane Concentration</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="arcane_instability">
+                  <label class="form-check-label">Use Arcane Instability</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="arcane_meditation">
+                  <label class="form-check-label">Use Arcane Meditation</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="arcane_mind">
+                  <label class="form-check-label">Use Arcane Mind</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="frost_channeling">
+                  <label class="form-check-label">Use Frost Channeling</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="ice_shards">
+                  <label class="form-check-label">Use Ice Shards</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="improved_frostbolt">
+                  <label class="form-check-label">Use Improved Frostbolt</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="piercing_ice">
+                  <label class="form-check-label">Use Piercing Ice</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="talents[]" value="presence_of_mind">
+                  <label class="form-check-label">Use Presence of Mind</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card mt-3 mb-3 ml-1" id="buffs_and_debuffs">
+            <div class="card-header">
+              <h5>Buffs and Debuffs</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="debuffs[]" value="nightfall">
+                  <label class="form-check-label">Include Nightfall Proc Debuff</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="debuffs[]" value="winters_chill">
+                  <label class="form-check-label">Include Winter's Chill Debuff</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="arcane_intellect">
+                  <label class="form-check-label">Include Arcane Intellect</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="mage_armor">
+                  <label class="form-check-label">Include Mage Armor</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="moonkin_form">
+                  <label class="form-check-label">Include Moonkin Form Group Buff</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="rallying_cry">
+                  <label class="form-check-label">Include Rallying Cry of the Dragonslayer (Ony/Nef buff)</label>
+                </div>  
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="songflower_serenade">
+                  <label class="form-check-label">Include Songflower Serenade (Felwood - 5% spell crit)</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="warchiefs_blessing">
+                  <label class="form-check-label">Include Warchief's Blessing (Rend buff)</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="dmf_damage">
+                  <label class="form-check-label">Include Dark Moon Faire 10% Damage Buff</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="dmf_intellect">
+                  <label class="form-check-label">Include Dark Moon Faire 10% Intellect Buff</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="dmf_spirit">
+                  <label class="form-check-label">Include Dark Moon Faire 10% Spirit Buff</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="dmn_slipkik">
+                  <label class="form-check-label">Include Slip'kik's Savy (DM Tribute Buff - 3% spell crit)</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="buffs[]" value="blessing_blackfathom">
+                  <label class="form-check-label">Include Blessing of Blackfathom</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card mt-3 mb-3 ml-1" id="consumables">
+            <div class="card-header">
+              <h5>Consumables</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="nightfin_soup">
+                  <label class="form-check-label">Use Nightfin Soup</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="run_tum_tuber_surprise">
+                  <label class="form-check-label">Use Run Tum Tuber Surprise</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="blessed_sunfruit_juice">
+                  <label class="form-check-label">Use Blessed Sunfruit Juice</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="greater_arcane_elixir">
+                  <label class="form-check-label">Use Greater Arcane Elixir</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="arcane_elixir">
+                  <label class="form-check-label">Use Arcane Elixir</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="elixir_frost_power">
+                  <label class="form-check-label">Use Elixir of Frost Power</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="flask_supreme_power">
+                  <label class="form-check-label">Use Flask of Supreme Power</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="flask_distilled_wisdom">
+                  <label class="form-check-label">Use Flask of Distilled Wisdom</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="blasted_intellect">
+                  <label class="form-check-label">Use Cerebral Cortex Compound (Blasted Lands Int Buff)</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="consumables[]" value="blasted_spirit">
+                  <label class="form-check-label">Use Gizzard Gum (Blasted Lands Spirit Buff)</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <% if @logs %>
+  <div class="row">
+    <div class="card mt-3">
+      <div class="card-body">
+        <h5 class="card-title">Results</h5>
+        <hr/>
+        <div class="form-group">
+          <div id="results">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% end %>
+</div>

@@ -1,0 +1,9 @@
+@import "~bootstrap/scss/bootstrap"; // never forget the semicolon at the end
+@import "./_custom";
+
+.inline-field input,
+.inline-field label {
+  display: inline-block;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
