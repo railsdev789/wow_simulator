@@ -1,46 +1,42 @@
 class PagesController < ApplicationController
   def simulate
     puts "TESTING: #{params}"
-    # TODO: split activated talents from regular talents
-
-    gear_set_1_keys = [:mana1, :int1, :spirit1, :mp51, :damage1, :hit1, :crit1]
-
     if (request.post?)
       simulations = {}
       
-      player_options = {:set_bonuses => {}, :talents => {}, :buffs => {}, :debuffs => {}, :consumables => {}}
-      modifier_options = {:talents => {}, :activated_items => {}, :mana_regen => {}}
+      player_options = {:set_bonuses => {}, :permanent_talents => {}, :buffs => {}, :debuffs => {}, :consumables => {}}
+      modifier_options = {:activated_talents => {}, :activated_items => {}, :mana_regen => {}}
 
       durations = params.fetch(:durations, ["60"]).map(&:to_i)
 
       player_options.keys.each do |key|
         params.fetch(key, []).each do |option|
-          if ((key == :talents) && (References::TALENTS[params[:select_class].to_sym][option.to_sym][:activated] == false))
-            player_options[key][option.to_sym] = "References::#{key.upcase}".constantize[params[:select_class].to_sym][option.to_sym]
-          elsif key != :talents
-            player_options[key][option.to_sym] = "References::#{key.upcase}".constantize[option.to_sym]
+          if (key == :permanent_talents)
+            player_options[key][option.to_sym] = "References::#{key.upcase}".constantize[params[:select_class].to_sym][option.to_sym].deep_dup
+          else
+            player_options[key][option.to_sym] = "References::#{key.upcase}".constantize[option.to_sym].deep_dup
           end
         end
       end
 
-      player_options.merge!({:class => params[:select_class], 
+      player_options.merge!({:selected_class => params[:select_class], 
                              :gear_set1 => request.parameters[:gear_set1].symbolize_keys, 
-                             :spell => References::SPELLS[params[:select_class].to_sym][request.parameters[:spell_ranks][0].split('_')[0].to_sym][request.parameters[:spell_ranks][0].to_sym]
+                             :spell => References::SPELLS[params[:select_class].to_sym][request.parameters[:spell_ranks][0].split('_')[0].to_sym][request.parameters[:spell_ranks][0].to_sym].deep_dup
                            })
 
-      References::TALENTS[params[:select_class].to_sym].each do |talent, talent_options|
-        if talent_options[:activated] == true && params.fetch(:talents, []).include?(talent.to_s)
-          modifier_options[:talents].merge!({talent => talent_options})
+      References::ACTIVATED_TALENTS[params[:select_class].to_sym].deep_dup.each do |talent, talent_options|
+        if params.fetch(:activated_talents, []).include?(talent.to_s)
+          modifier_options[:activated_talents].merge!({talent => talent_options})
         end
       end
 
-      References::ACTIVATED_ITEMS.each do |item, item_options|
+      References::ACTIVATED_ITEMS.deep_dup.each do |item, item_options|
         if item_options[:classes].include?(params[:select_class].to_sym) && params.fetch(:activated_items, []).include?(item.to_s)
-          modifier_options[:activated_items].merge!({item => item_options})
+          modifier_options[:activated_items][item] = item_options
         end
       end
 
-      References::MANA_REGEN.each do |item, item_options|
+      References::MANA_REGEN.deep_dup.each do |item, item_options|
         if item_options[:classes].include?(params[:select_class].to_sym) && params.fetch(:mana_regen, []).include?(item.to_s)
           modifier_options[:mana_regen].merge!({item => item_options})
         end
@@ -54,11 +50,25 @@ class PagesController < ApplicationController
       durations.each do |duration|
         simulations[duration] = Simulation.new({ :stop_time => duration, :player_options => player_options, :modifier_options => modifier_options})
       end
+
+      simulation = simulations[params[:durations][0].to_i]
+
+      puts "****************** TOTALS: #{@totals}"
+      simulation.run_simulation
+      @output = simulation.output
+      @totals = simulation.totals
+      puts "TEST5: #{@output}"
     end
 
-    @mage_spells = References::SPELLS[:mage]
-    @mana_regen = References::MANA_REGEN
-    @activated_items = References::ACTIVATED_ITEMS
+    @mage_spells = References::SPELLS[:mage].deep_dup
+    @mana_regen = References::MANA_REGEN.deep_dup
+    @activated_items = References::ACTIVATED_ITEMS.deep_dup
+    @activated_talents = References::ACTIVATED_TALENTS[:mage].deep_dup
+    @permanent_talents = References::PERMANENT_TALENTS[:mage].deep_dup
+    @set_bonuses = References::SET_BONUSES.deep_dup
+    @debuffs = References::DEBUFFS.deep_dup
+    @buffs = References::BUFFS.deep_dup
+    @consumables = References::CONSUMABLES.deep_dup
   end
 end
 # mana_regen

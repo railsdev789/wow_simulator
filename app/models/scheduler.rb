@@ -2,23 +2,28 @@ class Scheduler
   attr_accessor :schedule, :finished_events
   def initialize(options)
     @clock = options[:clock]
-    @modifier_tracker = options[:modifier_tracker]
     @player = options[:player]
     
     @finished_events = {}
-    @schedule = schedule
+    @schedule = {}
   end
 
-  def schedule_event(event_type, time)
-    options = { scheduled_time: time, name: event_type }
-    # case event_type
-    # when "MainHandSwingEvent"
-    #   @schedule[MainHandSwingEvent.new(options)] = time
-    # when "OffHandSwingEvent"
-    #   @schedule[OffHandSwingEvent.new(options)] = time
-    # when "TwoHandSwingEvent"
-    #   @schedule[TwoHandSwingEvent.new(options)] = time
-    # end
+  def schedule_event(event)
+    puts "ENTERED SCHEDULE EVENT METHOD, event.class: #{event.class}"
+    #TODO dynamic refactor / dry out code
+    case (event.class.to_s)
+    when "GlobalcooldownEvent"
+      @schedule[event] = event.scheduled_time
+    when "ActivatedEvent"
+      puts "INSIDE ACTIVATED EVENT STRING"
+      @schedule[event] = event.scheduled_time
+    when "SpellcastEvent"
+      schedule[event] = event.scheduled_time
+    when "ManaregenEvent"
+      schedule[event] = event.scheduled_time
+    else
+      puts "WHAT THE FUCK, HOW DID YOU GET HERE"
+    end
   end
 
   def set_event_to_finished(event)
